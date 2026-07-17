@@ -8,11 +8,11 @@ const STORAGE_KEY = 'sugarfree_v1';
 // Adjust these numbers after saving sprites.png to match the
 // actual pixel dimensions of your sprite sheet.
 const SPRITE = {
-  frameW: 154,   // px — width of ONE animation frame
-  frameH: 120,   // px — height of the character area (below label)
-  labelH: 28,    // px — height of the label text row above each sprite row
-  rowH:   150,   // px — total row height (labelH + frameH + gap)
-  groupW: 462,   // px — width of one 3-frame group  (frameW × 3)
+  frameW: 153,   // px — width of ONE animation frame  (1376 / 9 frames ≈ 153)
+  frameH: 128,   // px — height of the character area (below label)
+  labelH: 25,    // px — height of the label text row above each sprite row
+  rowH:   154,   // px — total row height  (768 / 5 rows ≈ 154)
+  groupW: 458,   // px — width of one 3-frame group  (1376 / 3 groups ≈ 458)
 };
 
 // ── Avatar definitions ────────────────────────────────────────

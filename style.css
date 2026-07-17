@@ -102,15 +102,15 @@ main {
 
 /* ── Sprite sheet system ── */
 
-/* One 3-frame group is 462px wide (154 × 3 frames).          */
-/* Adjust --sprite-group-w if your sheet uses different dims.  */
+/* One 3-frame group is 458px wide  (1376px sheet / 3 groups) */
+/* Adjust --sprite-group-w if you swap in a different sheet.   */
 :root {
-  --sprite-group-w: 462px;
+  --sprite-group-w: 458px;
 }
 
 .sprite-frame {
-  width: 154px;
-  height: 120px;
+  width: 153px;
+  height: 128px;
   background-image: url('sprites.png');
   background-repeat: no-repeat;
   background-size: auto;
@@ -126,8 +126,8 @@ main {
 /* Scale wrappers — the sprite-frame always stays 154×120 px  */
 /* internally; the wrapper clips it at the desired display size */
 .sprite-wrap-lg {
-  width: 231px;
-  height: 180px;
+  width: 230px;
+  height: 192px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -140,7 +140,7 @@ main {
 
 .sprite-wrap-sm {
   width: 100px;
-  height: 78px;
+  height: 84px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -152,8 +152,8 @@ main {
 }
 
 .sprite-wrap-xl {
-  width: 231px;
-  height: 180px;
+  width: 230px;
+  height: 192px;
   overflow: hidden;
   display: flex;
   align-items: center;
