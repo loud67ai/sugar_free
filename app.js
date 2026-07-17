@@ -4,13 +4,28 @@
 
 const STORAGE_KEY = 'sugarfree_v1';
 
+// ── Sprite sheet configuration ────────────────────────────────
+// Adjust these numbers after saving sprites.png to match the
+// actual pixel dimensions of your sprite sheet.
+const SPRITE = {
+  frameW: 154,   // px — width of ONE animation frame
+  frameH: 120,   // px — height of the character area (below label)
+  labelH: 28,    // px — height of the label text row above each sprite row
+  rowH:   150,   // px — total row height (labelH + frameH + gap)
+  groupW: 462,   // px — width of one 3-frame group  (frameW × 3)
+};
+
+// ── Avatar definitions ────────────────────────────────────────
+// row/col reference the position in the sprite sheet grid
+//   col: 0 = left group, 1 = center group, 2 = right group
+//   row: 0 = top, 4 = bottom
 const AVATARS = [
-  { emoji: '🌱', name: 'Sugar Sprout',    days: 1,   animClass: 'anim-sway',     desc: 'Just getting started!' },
-  { emoji: '🌿', name: 'Week Warrior',    days: 7,   animClass: 'anim-bounce',   desc: '7 days sugar free!' },
-  { emoji: '🌸', name: 'Blossom',         days: 14,  animClass: 'anim-pulse',    desc: 'Two strong weeks!' },
-  { emoji: '🌳', name: 'Monthly Master',  days: 30,  animClass: 'anim-sway-big', desc: 'A whole month!' },
-  { emoji: '⭐', name: 'Century Star',    days: 100, animClass: 'anim-spin',     desc: '100 days — incredible!' },
-  { emoji: '🔥', name: 'Year Legend',     days: 365, animClass: 'anim-flicker',  desc: 'A full year. Legendary!' },
+  { name: 'Sugar Sprout',  days: 1,   row: 4, col: 0, speed: '0.9s',  desc: 'Just getting started!' },
+  { name: 'Week Warrior',  days: 7,   row: 0, col: 0, speed: '0.55s', desc: '7 days sugar free!' },
+  { name: 'Broccoli Boss', days: 14,  row: 1, col: 1, speed: '0.8s',  desc: 'Two strong weeks!' },
+  { name: 'Zen Master',    days: 30,  row: 1, col: 2, speed: '1.2s',  desc: 'A whole month!' },
+  { name: 'Bookworm',      days: 100, row: 3, col: 2, speed: '1.0s',  desc: '100 days — incredible!' },
+  { name: 'Year Legend',   days: 365, row: 4, col: 2, speed: '0.65s', desc: 'A full year. Legendary!' },
 ];
 
 // ── Storage ──────────────────────────────────────────────────
@@ -85,7 +100,32 @@ function getProgressInfo(streak) {
       return { next: AVATARS[i], pct, remaining: AVATARS[i].days - streak };
     }
   }
-  return null; // all avatars unlocked
+  return null;
+}
+
+// ── Sprite helpers ────────────────────────────────────────────
+
+// Returns { sx, sy } background-position values for an avatar
+function spritePos(avatar) {
+  return {
+    sx: -(avatar.col * SPRITE.groupW),
+    sy: -(avatar.row * SPRITE.rowH + SPRITE.labelH),
+  };
+}
+
+// Apply sprite sheet position + animation speed to any .sprite-frame element
+function applySpriteEl(el, avatar) {
+  const { sx, sy } = spritePos(avatar);
+  el.style.setProperty('--sx', sx + 'px');
+  el.style.backgroundPositionY = sy + 'px';
+  el.style.setProperty('--speed', avatar.speed || '0.8s');
+  el.style.opacity = '1';
+}
+
+// Build the innerHTML for an avatar card (unlocked)
+function spriteCardHTML(avatar) {
+  const { sx, sy } = spritePos(avatar);
+  return `<div class="sprite-frame" style="--sx:${sx}px; background-position-y:${sy}px; --speed:${avatar.speed || '0.8s'};"></div>`;
 }
 
 // ── Screen Navigation ─────────────────────────────────────────
@@ -112,19 +152,21 @@ function updateHomeScreen() {
   const avatar  = getCurrentAvatar(streak);
   const info    = getProgressInfo(streak);
 
-  // Avatar
+  // Avatar display
   const emojiEl = document.getElementById('current-avatar');
   const nameEl  = document.getElementById('avatar-name');
+  emojiEl.className = 'sprite-frame';
   if (avatar) {
-    emojiEl.textContent   = avatar.emoji;
-    emojiEl.className     = 'avatar-emoji ' + avatar.animClass;
-    emojiEl.style.opacity = '1';
-    nameEl.textContent    = avatar.name;
+    applySpriteEl(emojiEl, avatar);
+    nameEl.textContent = avatar.name;
   } else {
-    emojiEl.textContent   = '🌱';
-    emojiEl.className     = 'avatar-emoji';
-    emojiEl.style.opacity = '0.2';
-    nameEl.textContent    = 'Check in to unlock!';
+    // No avatar yet — show first avatar dimmed as a teaser
+    const { sx, sy } = spritePos(AVATARS[0]);
+    emojiEl.style.setProperty('--sx', sx + 'px');
+    emojiEl.style.backgroundPositionY = sy + 'px';
+    emojiEl.style.setProperty('--speed', '99s'); // effectively paused
+    emojiEl.style.opacity = '0.15';
+    nameEl.textContent = 'Check in to unlock!';
   }
 
   // Streak counter
@@ -192,11 +234,14 @@ function doCheckin() {
 }
 
 function showUnlockCelebration(avatar) {
+  const { sx, sy } = spritePos(avatar);
   const overlay = document.createElement('div');
   overlay.className = 'celebration-overlay';
   overlay.innerHTML = `
     <div class="celebration-content">
-      <div class="celebration-emoji ${avatar.animClass}">${avatar.emoji}</div>
+      <div class="sprite-wrap-xl">
+        <div class="sprite-frame" style="--sx:${sx}px; background-position-y:${sy}px; --speed:${avatar.speed || '0.8s'};"></div>
+      </div>
       <h2>New Avatar Unlocked!</h2>
       <h3>${avatar.name}</h3>
       <p>${avatar.desc}</p>
@@ -288,15 +333,28 @@ function renderAvatars() {
       (unlocked  ? ' unlocked' : ' locked') +
       (isCurrent ? ' current'  : '');
 
-    card.innerHTML = `
-      <div class="avatar-card-emoji ${unlocked ? a.animClass : ''}">${unlocked ? a.emoji : '🔒'}</div>
-      <div class="avatar-card-name">${a.name}</div>
-      <div class="avatar-card-days">${a.days} day${a.days !== 1 ? 's' : ''}</div>
-      <div class="avatar-card-desc">${unlocked ? a.desc : '???'}</div>
-    `;
+    if (unlocked) {
+      card.innerHTML = `
+        <div class="avatar-card-inner">
+          <div class="sprite-wrap-sm">
+            ${spriteCardHTML(a)}
+          </div>
+        </div>
+        <div class="avatar-card-name">${a.name}</div>
+        <div class="avatar-card-days">${a.days} day${a.days !== 1 ? 's' : ''}</div>
+        <div class="avatar-card-desc">${a.desc}</div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="avatar-card-inner">
+          <span class="sprite-locked-icon">🔒</span>
+        </div>
+        <div class="avatar-card-name">${a.name}</div>
+        <div class="avatar-card-days">${a.days} day${a.days !== 1 ? 's' : ''}</div>
+        <div class="avatar-card-desc">???</div>
+      `;
+    }
     grid.appendChild(card);
-  }
-}
 
 // ── Settings ──────────────────────────────────────────────────
 
