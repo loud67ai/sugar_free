@@ -467,3 +467,176 @@ input[type="password"]:focus { border-color: var(--primary); }
 .celebration-content h2 { font-size: 15px; color: var(--amber); margin-bottom: 6px; }
 .celebration-content h3 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
 .celebration-content p  { font-size: 14px; color: var(--muted); line-height: 1.4; }
+.cel-shiny-note { font-size: 12px; color: #a78bfa !important; margin-top: 8px; line-height: 1.4; }
+
+/* === Own-streak bar under character name === */
+.own-streak-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 20px;
+}
+.own-progress-bar {
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.own-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, var(--amber));
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+.own-shiny { color: var(--amber); font-weight: 700; font-size: 13px; }
+
+/* === Cheat day badge + button === */
+.cheat-badge {
+  font-size: 13px;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 99px;
+  padding: 5px 14px;
+  text-align: center;
+}
+.cheat-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 13px;
+  border: 2px solid #4ade80;
+  border-radius: var(--radius);
+  background: rgba(74, 222, 128, 0.08);
+  color: #4ade80;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.cheat-btn:active { opacity: 0.8; }
+
+/* === Shiny character glow === */
+.sprite-frame.shiny {
+  animation: sprite-anim var(--speed, 0.8s) steps(3) infinite,
+             shiny-pulse 2s ease-in-out infinite;
+}
+@keyframes shiny-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px gold); }
+  50%       { filter: drop-shadow(0 0 14px gold) drop-shadow(0 0 24px rgba(255,215,0,0.7)); }
+}
+
+/* === Deck grid === */
+.deck-hint {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 12px 16px 0;
+}
+.deck-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 16px 120px;
+}
+.char-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.char-card:active { opacity: 0.85; }
+.char-card.active {
+  border-color: var(--amber);
+  box-shadow: 0 0 16px rgba(245,158,11,0.3);
+}
+.char-card.shiny { border-color: gold; }
+.char-card.locked { opacity: 0.4; cursor: default; }
+.char-card-name  { font-size: 12px; font-weight: 700; }
+.char-own-bar    { width: 80px; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 2px; }
+.char-own-fill   { height: 100%; background: linear-gradient(90deg, #a78bfa, var(--amber)); border-radius: 99px; }
+.char-card-sub   { font-size: 10px; color: var(--muted); }
+.char-active-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-size: 9px; font-weight: 700;
+  background: var(--amber); color: #000;
+  padding: 2px 5px; border-radius: 4px;
+}
+
+/* === Streak broken screen === */
+.broken-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px 24px;
+  min-height: 100%;
+  text-align: center;
+}
+.broken-title { font-size: 26px; font-weight: 900; color: var(--red); }
+.broken-sub   { font-size: 15px; color: var(--muted); line-height: 1.55; }
+.broken-safe  { font-size: 13px; color: var(--primary); font-weight: 700; }
+.broken-fast-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 18px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+}
+.broken-fast-btn:active { opacity: 0.9; }
+.broken-btn-sub   { font-size: 12px; font-weight: 400; opacity: 0.8; }
+.broken-restart-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.broken-restart-btn:active { opacity: 0.8; }
+.no-recover-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* === Calendar legend + new day types === */
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 0;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.cal-key { font-size: 14px; margin-right: 3px; }
+.cal-key.clean  { color: var(--primary); }
+.cal-key.cheat  { color: var(--amber); }
+.cal-key.fasted { color: #60a5fa; }
+.cal-day.cheat  { background: var(--amber); color: #000; font-weight: 700; }
+.cal-day.fasted { background: #3b82f6; color: white; font-weight: 700; }
+
