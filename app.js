@@ -21,7 +21,8 @@ const SPRITE = {
 //   row: 0 = top, 4 = bottom
 const AVATARS = [
   { name: 'Sugar Sprout',  days: 1,   row: 4, col: 0, speed: '0.9s',  desc: 'Just getting started!' },
-  { name: 'Week Warrior',  days: 7,   row: 0, col: 0, speed: '0.55s', desc: '7 days sugar free!' },
+  // Week Warrior uses its own 7-frame dedicated sprite
+  { name: 'Week Warrior',  days: 7,   customSrc: 'avatar-jumprope.png', frames: 7, speed: '1.0s', desc: '7 days sugar free!' },
   { name: 'Broccoli Boss', days: 14,  row: 1, col: 1, speed: '0.8s',  desc: 'Two strong weeks!' },
   { name: 'Zen Master',    days: 30,  row: 1, col: 2, speed: '1.2s',  desc: 'A whole month!' },
   { name: 'Bookworm',      days: 100, row: 3, col: 2, speed: '1.0s',  desc: '100 days — incredible!' },
@@ -115,15 +116,30 @@ function spritePos(avatar) {
 
 // Apply sprite sheet position + animation speed to any .sprite-frame element
 function applySpriteEl(el, avatar) {
-  const { sx, sy } = spritePos(avatar);
-  el.style.setProperty('--sx', sx + 'px');
-  el.style.backgroundPositionY = sy + 'px';
+  if (avatar.customSrc) {
+    // Dedicated single-image sprite: all frames are across the full image width
+    const totalW = SPRITE.frameW * avatar.frames;  // e.g. 153 * 7 = 1071px
+    el.style.setProperty('--sprite-img', `url('${avatar.customSrc}')`);
+    el.style.setProperty('--sprite-group-w', totalW + 'px');
+    el.style.setProperty('--sx', '0px');
+    el.style.backgroundPositionY = '0px';
+  } else {
+    const { sx, sy } = spritePos(avatar);
+    el.style.setProperty('--sprite-img', `url('sprites.png')`);
+    el.style.setProperty('--sprite-group-w', SPRITE.groupW + 'px');
+    el.style.setProperty('--sx', sx + 'px');
+    el.style.backgroundPositionY = sy + 'px';
+  }
   el.style.setProperty('--speed', avatar.speed || '0.8s');
   el.style.opacity = '1';
 }
 
 // Build the innerHTML for an avatar card (unlocked)
 function spriteCardHTML(avatar) {
+  if (avatar.customSrc) {
+    const totalW = SPRITE.frameW * avatar.frames;
+    return `<div class="sprite-frame" style="--sprite-img:url('${avatar.customSrc}'); --sprite-group-w:${totalW}px; --sx:0px; --speed:${avatar.speed || '0.8s'};"></div>`;
+  }
   const { sx, sy } = spritePos(avatar);
   return `<div class="sprite-frame" style="--sx:${sx}px; background-position-y:${sy}px; --speed:${avatar.speed || '0.8s'};"></div>`;
 }
@@ -160,11 +176,10 @@ function updateHomeScreen() {
     applySpriteEl(emojiEl, avatar);
     nameEl.textContent = avatar.name;
   } else {
-    // No avatar yet — show first avatar dimmed as a teaser
-    const { sx, sy } = spritePos(AVATARS[0]);
-    emojiEl.style.setProperty('--sx', sx + 'px');
-    emojiEl.style.backgroundPositionY = sy + 'px';
-    emojiEl.style.setProperty('--speed', '99s'); // effectively paused
+    // No avatar yet — apply first avatar dimmed as a teaser
+    const teaser = AVATARS[0];
+    applySpriteEl(emojiEl, teaser);
+    emojiEl.style.setProperty('--speed', '99s');
     emojiEl.style.opacity = '0.15';
     nameEl.textContent = 'Check in to unlock!';
   }
@@ -234,13 +249,20 @@ function doCheckin() {
 }
 
 function showUnlockCelebration(avatar) {
-  const { sx, sy } = spritePos(avatar);
+  let spriteStyle;
+  if (avatar.customSrc) {
+    const totalW = SPRITE.frameW * avatar.frames;
+    spriteStyle = `--sprite-img:url('${avatar.customSrc}'); --sprite-group-w:${totalW}px; --sx:0px; --speed:${avatar.speed || '0.8s'};`;
+  } else {
+    const { sx, sy } = spritePos(avatar);
+    spriteStyle = `--sx:${sx}px; background-position-y:${sy}px; --speed:${avatar.speed || '0.8s'};`;
+  }
   const overlay = document.createElement('div');
   overlay.className = 'celebration-overlay';
   overlay.innerHTML = `
     <div class="celebration-content">
       <div class="sprite-wrap-xl">
-        <div class="sprite-frame" style="--sx:${sx}px; background-position-y:${sy}px; --speed:${avatar.speed || '0.8s'};"></div>
+        <div class="sprite-frame" style="${spriteStyle}"></div>
       </div>
       <h2>New Avatar Unlocked!</h2>
       <h3>${avatar.name}</h3>

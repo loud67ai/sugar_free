@@ -111,7 +111,7 @@ main {
 .sprite-frame {
   width: 153px;
   height: 128px;
-  background-image: url('sprites.png');
+  background-image: var(--sprite-img, url('sprites.png'));
   background-repeat: no-repeat;
   background-size: auto;
   flex-shrink: 0;
