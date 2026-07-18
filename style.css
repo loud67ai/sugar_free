@@ -661,4 +661,16 @@ input[type="password"]:focus { border-color: var(--primary); }
 }
 .btn-dev-reset:active { opacity: 0.8; }
 
+/* Dev shortcut on home screen */
+.dev-day-btn {
+  font-size: 11px;
+  color: var(--amber);
+  background: rgba(251,191,36,0.08);
+  border: 1px dashed rgba(251,191,36,0.35);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
 
