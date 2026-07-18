@@ -82,7 +82,7 @@ main {
   justify-content: center;
   gap: 22px;
   padding: 28px 24px;
-  min-height: 100%;
+  overflow-y: auto;
 }
 
 /* ── Avatar ── */
@@ -583,7 +583,7 @@ input[type="password"]:focus { border-color: var(--primary); }
   justify-content: center;
   gap: 18px;
   padding: 40px 24px;
-  min-height: 100%;
+  overflow-y: auto;
   text-align: center;
 }
 .broken-title { font-size: 26px; font-weight: 900; color: var(--red); }
