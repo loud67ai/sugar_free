@@ -137,6 +137,15 @@
         <h2>⚠️ Danger Zone</h2>
         <button class="btn-danger" onclick="resetData()">🗑 Reset All Data</button>
       </section>
+      <section class="settings-card dev-card">
+        <h2>🧪 Dev Testing</h2>
+        <p class="settings-note">Simulate days passing to test milestones, shiny counters, and streak recovery without waiting.</p>
+        <p id="dev-date" class="dev-date"></p>
+        <div class="btn-row">
+          <button class="btn-dev" onclick="advanceDevDay()">⏭ Next Day</button>
+          <button class="btn-dev-reset" onclick="resetDevDate()">↩ Reset to Today</button>
+        </div>
+      </section>
     </main>
     <nav class="bottom-nav">
       <button class="nav-btn"        data-screen="home"     onclick="showScreen('home')">🏠<span>Home</span></button>
@@ -151,125 +160,3 @@
 </body>
 </html>
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0f1e">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sugar Free">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.svg">
-  <title>Sugar Free</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <!-- ── Home Screen ── -->
-  <div id="screen-home" class="screen active">
-    <header>
-      <span class="header-title">Sugar Free 🚫🍬</span>
-    </header>
-    <main class="home-main">
-      <div class="avatar-wrap">
-        <div class="sprite-wrap-lg">
-          <div id="current-avatar" class="sprite-frame"></div>
-        </div>
-        <p id="avatar-name" class="avatar-name">Check in to unlock!</p>
-      </div>
-      <div class="streak-wrap">
-        <span id="streak-count" class="streak-num">0</span>
-        <span class="streak-label">Day Streak 🔥</span>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
-        <p id="progress-label" class="progress-label">Check in today to start your streak!</p>
-      </div>
-      <button id="checkin-btn" class="checkin-btn" onclick="doCheckin()">
-        ✓ I'm Sugar Free Today!
-      </button>
-      <p id="checkin-status" class="checkin-status">Tap to start your streak!</p>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-btn active" data-screen="home"     onclick="showScreen('home')">🏠<span>Home</span></button>
-      <button class="nav-btn"        data-screen="calendar" onclick="showScreen('calendar')">📅<span>History</span></button>
-      <button class="nav-btn"        data-screen="avatars"  onclick="showScreen('avatars')">🏆<span>Rewards</span></button>
-      <button class="nav-btn"        data-screen="settings" onclick="showScreen('settings')">⚙️<span>Settings</span></button>
-    </nav>
-  </div>
-
-  <!-- ── History / Calendar Screen ── -->
-  <div id="screen-calendar" class="screen">
-    <header>
-      <button class="back-btn" onclick="showScreen('home')">‹</button>
-      <span class="header-title">History</span>
-      <span></span>
-    </header>
-    <main>
-      <div id="calendar-container" class="calendar-container"></div>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-btn"        data-screen="home"     onclick="showScreen('home')">🏠<span>Home</span></button>
-      <button class="nav-btn active" data-screen="calendar" onclick="showScreen('calendar')">📅<span>History</span></button>
-      <button class="nav-btn"        data-screen="avatars"  onclick="showScreen('avatars')">🏆<span>Rewards</span></button>
-      <button class="nav-btn"        data-screen="settings" onclick="showScreen('settings')">⚙️<span>Settings</span></button>
-    </nav>
-  </div>
-
-  <!-- ── Rewards / Avatars Screen ── -->
-  <div id="screen-avatars" class="screen">
-    <header>
-      <button class="back-btn" onclick="showScreen('home')">‹</button>
-      <span class="header-title">Rewards</span>
-      <span></span>
-    </header>
-    <main>
-      <div id="avatars-grid" class="avatars-grid"></div>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-btn"        data-screen="home"     onclick="showScreen('home')">🏠<span>Home</span></button>
-      <button class="nav-btn"        data-screen="calendar" onclick="showScreen('calendar')">📅<span>History</span></button>
-      <button class="nav-btn active" data-screen="avatars"  onclick="showScreen('avatars')">🏆<span>Rewards</span></button>
-      <button class="nav-btn"        data-screen="settings" onclick="showScreen('settings')">⚙️<span>Settings</span></button>
-    </nav>
-  </div>
-
-  <!-- ── Settings Screen ── -->
-  <div id="screen-settings" class="screen">
-    <header>
-      <button class="back-btn" onclick="showScreen('home')">‹</button>
-      <span class="header-title">Settings</span>
-      <span></span>
-    </header>
-    <main class="settings-main">
-      <section class="settings-card">
-        <h2>☁️ Cloud Backup</h2>
-        <p class="settings-note">
-          Create a <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" rel="noopener noreferrer">GitHub PAT</a>
-          with <strong>gist</strong> scope only. Your streak is backed up to a private GitHub Gist.
-        </p>
-        <label class="field-label">Personal Access Token</label>
-        <input type="password" id="pat-input" placeholder="ghp_..." autocomplete="off" spellcheck="false">
-        <div class="btn-row">
-          <button class="btn-secondary" onclick="backup.save()">💾 Back Up</button>
-          <button class="btn-secondary" onclick="backup.restore()">📥 Restore</button>
-        </div>
-        <p id="backup-status" class="backup-status"></p>
-      </section>
-
-      <section class="settings-card danger-card">
-        <h2>⚠️ Danger Zone</h2>
-        <button class="btn-danger" onclick="resetData()">🗑 Reset All Data</button>
-      </section>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-btn"        data-screen="home"     onclick="showScreen('home')">🏠<span>Home</span></button>
-      <button class="nav-btn"        data-screen="calendar" onclick="showScreen('calendar')">📅<span>History</span></button>
-      <button class="nav-btn"        data-screen="avatars"  onclick="showScreen('avatars')">🏆<span>Rewards</span></button>
-      <button class="nav-btn active" data-screen="settings" onclick="showScreen('settings')">⚙️<span>Settings</span></button>
-    </nav>
-  </div>
-
-  <script src="app.js"></script>
-  <script src="backup.js"></script>
-</body>
-</html>

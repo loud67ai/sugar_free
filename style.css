@@ -640,3 +640,25 @@ input[type="password"]:focus { border-color: var(--primary); }
 .cal-day.cheat  { background: var(--amber); color: #000; font-weight: 700; }
 .cal-day.fasted { background: #3b82f6; color: white; font-weight: 700; }
 
+/* === Dev testing panel === */
+.dev-card          { border-color: rgba(251,191,36,0.4) !important; }
+.dev-card h2       { color: #fbbf24; }
+.dev-date          { font-size: 13px; font-weight: 600; color: var(--amber); text-align: center; min-height: 18px; }
+.btn-dev {
+  flex: 1; padding: 12px;
+  background: rgba(251,191,36,0.12);
+  border: 1px solid rgba(251,191,36,0.4);
+  border-radius: 10px;
+  color: #fbbf24; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.btn-dev:active { opacity: 0.8; }
+.btn-dev-reset {
+  flex: 1; padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.btn-dev-reset:active { opacity: 0.8; }
+
+

@@ -73,9 +73,24 @@ function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)
 
 // ── Date utilities ────────────────────────────────────────────
 
+const DEV_KEY = 'sugarfree_devoffset';
+
 function todayStr() {
   const d = new Date();
+  const offset = parseInt(localStorage.getItem(DEV_KEY) || '0', 10);
+  if (offset) d.setDate(d.getDate() + offset);
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function advanceDevDay() {
+  const n = parseInt(localStorage.getItem(DEV_KEY) || '0', 10);
+  localStorage.setItem(DEV_KEY, String(n + 1));
+  loadSettingsScreen();
+}
+
+function resetDevDate() {
+  localStorage.removeItem(DEV_KEY);
+  loadSettingsScreen();
 }
 function pad(n) { return String(n).padStart(2,'0'); }
 function subtractDay(s) {
@@ -519,6 +534,11 @@ function loadSettingsScreen() {
   document.getElementById('pat-input').value = data.settings?.githubPAT||'';
   const s=document.getElementById('backup-status');
   s.textContent=''; s.className='backup-status';
+  const offset = parseInt(localStorage.getItem(DEV_KEY)||'0', 10);
+  const el = document.getElementById('dev-date');
+  if (el) el.textContent = offset > 0
+    ? `Simulated: ${todayStr()}  (+${offset} days)`
+    : `Today: ${todayStr()}`;
 }
 
 function resetData() {
