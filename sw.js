@@ -3,7 +3,7 @@
 // Cache-first for app shell; pass through GitHub API calls.
 // ============================================================
 
-const CACHE_NAME = 'sugarfree-v2';
+const CACHE_NAME = 'sugarfree-v3';
 
 const APP_SHELL = [
   './',
