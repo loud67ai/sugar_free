@@ -3,7 +3,7 @@
 // Cache-first for app shell; pass through GitHub API calls.
 // ============================================================
 
-const CACHE_NAME = 'sugarfree-v4';
+const CACHE_NAME = 'sugarfree-v5';
 
 const APP_SHELL = [
   './',
@@ -22,6 +22,8 @@ const APP_SHELL = [
   './avatars/avatar-jumprope-shiny.png',
   './avatars/avatar-bicep.png',
   './avatars/avatar-bicep-shiny.png',
+  './avatars/avatar-zen.png',
+  './avatars/avatar-zen-shiny.png',
 ];
 
 // Install: pre-cache the app shell
