@@ -3,7 +3,7 @@
 // Cache-first for app shell; pass through GitHub API calls.
 // ============================================================
 
-const CACHE_NAME = 'sugarfree-v3';
+const CACHE_NAME = 'sugarfree-v4';
 
 const APP_SHELL = [
   './',
@@ -14,8 +14,14 @@ const APP_SHELL = [
   './manifest.json',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
-  './sprites.png',
+  './avatars/avatar-sprout.png',
+  './avatars/avatar-sprout-shiny.png',
+  './avatars/avatar-crash.png',
+  './avatars/avatar-crash-shiny.png',
   './avatars/avatar-jumprope.png',
+  './avatars/avatar-jumprope-shiny.png',
+  './avatars/avatar-bicep.png',
+  './avatars/avatar-bicep-shiny.png',
 ];
 
 // Install: pre-cache the app shell
