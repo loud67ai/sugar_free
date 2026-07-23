@@ -169,29 +169,31 @@ def pad_to_canvas(img, canvas_w, canvas_h):
     return canvas
 
 
-def fill_to_canvas(img, canvas_w, canvas_h):
-    """Scale to canvas HEIGHT, then centre-crop or pad to canvas WIDTH.
+def fill_to_canvas(img, canvas_w, canvas_h, target_height=None):
+    """Scale to target_height (or canvas HEIGHT if unset), then centre-crop or pad to canvas WIDTH.
 
     Good for wide characters (e.g. jump rope arc) where fit-mode would
     shrink the character too small.  Wide elements that extend past the
     canvas edges will be cropped symmetrically.
     """
+    fill_h = target_height if target_height and target_height < canvas_h else canvas_h
     w, h = img.size
-    if h != canvas_h:
-        ratio = canvas_h / h
+    if h != fill_h:
+        ratio = fill_h / h
         new_w = int(round(w * ratio))
-        img = img.resize((new_w, canvas_h), Image.LANCZOS)
+        img = img.resize((new_w, fill_h), Image.LANCZOS)
     w, h = img.size
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+    y_off = (canvas_h - h) // 2  # centre vertically when fill_h < canvas_h
     if w >= canvas_w:
-        # wider than canvas — centre-crop
+        # wider than canvas — centre-crop horizontally
         x = (w - canvas_w) // 2
-        cropped = img.crop((x, 0, x + canvas_w, canvas_h))
-        canvas.paste(cropped, (0, 0))
+        cropped = img.crop((x, 0, x + canvas_w, h))
+        canvas.paste(cropped, (0, y_off))
     else:
-        # narrower than canvas — centre-pad
+        # narrower than canvas — centre-pad horizontally
         x = (canvas_w - w) // 2
-        canvas.paste(img, (x, 0))
+        canvas.paste(img, (x, y_off))
     return canvas
 
 
@@ -310,8 +312,8 @@ def main():
     if args.canvas:
         cw, ch = args.canvas
         if args.canvas_fill:
-            normal = fill_to_canvas(normal, cw, ch)
-            shiny  = fill_to_canvas(shiny,  cw, ch)
+            normal = fill_to_canvas(normal, cw, ch, args.height)
+            shiny  = fill_to_canvas(shiny,  cw, ch, args.height)
             print(f"Canvas : {cw}\u00d7{ch} (fill-to-height + centre-crop/pad)")
         else:
             normal = pad_to_canvas(normal, cw, ch)
