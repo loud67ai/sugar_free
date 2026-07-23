@@ -15,7 +15,8 @@ const CHARACTER_DEFS = {
   bicep:    { name:'Iron Pumper',   earnAt:21,  customSrc:'avatars/avatar-bicep.png',    shinySrc:'avatars/avatar-bicep-shiny.png',    shinyAt:35,  speed:'0.8s',  desc:'Three weeks of strength!' },
   broccoli: { name:'Broccoli Boss', earnAt:14,  src:'sprites.png', frames:3, row:1, col:1, shinyAt:28,  speed:'0.8s',  desc:'Two strong weeks!' },
   zen:      { name:'Zen Master',    earnAt:30,  customSrc:'avatars/avatar-zen.png',      shinySrc:'avatars/avatar-zen-shiny.png',      shinyAt:42,  speed:'1.2s',  desc:'A whole month!' },
-  bookworm: { name:'Bookworm',      earnAt:100, src:'sprites.png', frames:3, row:3, col:2, shinyAt:60,  speed:'1.0s',  desc:'100 days — incredible!' },
+  runner:   { name:'Trail Runner',  earnAt:60,  customSrc:'avatars/avatar-runner.png',    shinySrc:'avatars/avatar-runner-shiny.png',    shinyAt:50,  speed:'0.8s',  desc:'Two months, full stride!' },
+  bookworm: { name:'Bookworm',      earnAt:100, customSrc:'avatars/avatar-bookworm.png',  shinySrc:'avatars/avatar-bookworm-shiny.png',  shinyAt:60,  speed:'1.0s',  desc:'100 days — incredible!' },
   legend:   { name:'Year Legend',   earnAt:365, src:'sprites.png', frames:3, row:4, col:2, shinyAt:100, speed:'0.65s', desc:'A full year. Legendary!' },
   crash:    { name:'Sugar Crash',   earnAt:-1,  customSrc:'avatars/avatar-crash.png', shinySrc:'avatars/avatar-crash-shiny.png', shinyAt:14,  speed:'2.5s',  desc:'Even crashes can shine…' },
 };
