@@ -10,14 +10,14 @@ const SPRITE = { frameW:153, frameH:128, labelH:25, rowH:154, groupW:458 };
 // ── Character definitions ─────────────────────────────────────
 // earnAt: streak day earned.  -1 = special (broken streak reward)
 const CHARACTER_DEFS = {
-  sprout:   { name:'Sugar Sprout',  earnAt:1,   src:'sprites.png', frames:3, row:4, col:0, shinyAt:7,   speed:'0.9s',  desc:'Your first step to freedom!' },
-  jumprope: { name:'Week Warrior',  earnAt:7,   customSrc:'avatar-jumprope.png', frames:7,              shinyAt:28,  speed:'1.0s',  desc:'7 days sugar free!' },
+  sprout:   { name:'Sugar Sprout',  earnAt:1,   customSrc:'avatars/avatar-sprout.png', shinySrc:'avatars/avatar-sprout-shiny.png', frames:3, shinyAt:7,   speed:'0.9s',  desc:'Your first step to freedom!' },
+  jumprope: { name:'Week Warrior',  earnAt:7,   customSrc:'avatars/avatar-jumprope.png', shinySrc:'avatars/avatar-jumprope-shiny.png', shinyAt:28,  speed:'1.0s',  desc:'7 days sugar free!' },
+  bicep:    { name:'Iron Pumper',   earnAt:21,  customSrc:'avatars/avatar-bicep.png',    shinySrc:'avatars/avatar-bicep-shiny.png',    shinyAt:35,  speed:'0.8s',  desc:'Three weeks of strength!' },
   broccoli: { name:'Broccoli Boss', earnAt:14,  src:'sprites.png', frames:3, row:1, col:1, shinyAt:28,  speed:'0.8s',  desc:'Two strong weeks!' },
   zen:      { name:'Zen Master',    earnAt:30,  src:'sprites.png', frames:3, row:1, col:2, shinyAt:42,  speed:'1.2s',  desc:'A whole month!' },
   bookworm: { name:'Bookworm',      earnAt:100, src:'sprites.png', frames:3, row:3, col:2, shinyAt:60,  speed:'1.0s',  desc:'100 days — incredible!' },
   legend:   { name:'Year Legend',   earnAt:365, src:'sprites.png', frames:3, row:4, col:2, shinyAt:100, speed:'0.65s', desc:'A full year. Legendary!' },
-  crash:    { name:'Sugar Crash',   earnAt:-1,  src:'sprites.png', frames:3, row:2, col:2, shinyAt:14,  speed:'2.5s',  desc:'Even crashes can shine…',
-               filter:'grayscale(0.85) hue-rotate(195deg) brightness(0.7)' },
+  crash:    { name:'Sugar Crash',   earnAt:-1,  customSrc:'avatars/avatar-crash.png', shinySrc:'avatars/avatar-crash-shiny.png', shinyAt:14,  speed:'2.5s',  desc:'Even crashes can shine…' },
 };
 
 const MILESTONES = Object.entries(CHARACTER_DEFS)
@@ -32,7 +32,7 @@ function freshData() {
     version:2,
     checkins:{},      // "YYYY-MM-DD": "clean"|"cheat"|"fasted"
     streak:{ current:0, longest:0, cheatBalance:0, cheatMilestonesEarned:0 },
-    characters:{},    // id → { defKey, ownStreak, isShiny }
+    characters:{},    // id → { defKey, ownStreak, isShiny, useShiny }
     activeCharId:null,
     ui:{ brokenAckedDate:null },
     settings:{},
@@ -154,7 +154,7 @@ function applyCheatMilestones(data, newStreak) {
 
 function addCharacter(data, defKey) {
   const id = defKey + '-' + Date.now();
-  data.characters[id] = { defKey, ownStreak:0, isShiny:false };
+  data.characters[id] = { defKey, ownStreak:0, isShiny:false, useShiny:false };
   if (!data.activeCharId) data.activeCharId = id;
   return id;
 }
@@ -185,7 +185,7 @@ function tickCharacters(data) {
     if (!ch.isShiny) {
       ch.ownStreak = (ch.ownStreak||0) + 1;
       const def = CHARACTER_DEFS[ch.defKey];
-      if (def && ch.ownStreak >= def.shinyAt) ch.isShiny = true;
+      if (def && ch.ownStreak >= def.shinyAt) { ch.isShiny = true; ch.useShiny = true; }
     }
   }
 }
@@ -203,29 +203,20 @@ function spritePos(def) {
   return { sx:-(def.col*SPRITE.groupW), sy:-(def.row*SPRITE.rowH+SPRITE.labelH) };
 }
 
-function applySpriteEl(el, def) {
-  if (def.customSrc) {
-    el.style.setProperty('--sprite-img', `url('${def.customSrc}')`);
-    el.style.setProperty('--sprite-group-w', (SPRITE.frameW*def.frames)+'px');
-    el.style.setProperty('--sx','0px');
-    el.style.backgroundPositionY = '0px';
-  } else {
-    const {sx,sy} = spritePos(def);
-    el.style.setProperty('--sprite-img', `url('sprites.png')`);
-    el.style.setProperty('--sprite-group-w', SPRITE.groupW+'px');
-    el.style.setProperty('--sx', sx+'px');
-    el.style.backgroundPositionY = sy+'px';
-  }
-  el.style.setProperty('--speed', def.speed||'0.8s');
+function applySpriteEl(el, def, isShiny=false) {
+  const src = (isShiny && def.shinySrc) ? def.shinySrc : def.customSrc;
+  if (src) { el.src = src; el.classList.add('avatar-img'); }
+  else { el.classList.remove('avatar-img'); }
   el.style.filter = def.filter||'';
   el.style.opacity = '1';
 }
 
-function spriteCardHTML(def) {
-  const style = def.customSrc
-    ? `--sprite-img:url('${def.customSrc}'); --sprite-group-w:${SPRITE.frameW*def.frames}px; --sx:0px; --speed:${def.speed||'0.8s'};`
-    : `--sx:${-(def.col*SPRITE.groupW)}px; background-position-y:${-(def.row*SPRITE.rowH+SPRITE.labelH)}px; --speed:${def.speed||'0.8s'};`;
-  return `<div class="sprite-frame" style="${style}${def.filter?' filter:'+def.filter+';':''}"></div>`;
+function spriteCardHTML(def, isShiny=false) {
+  const src = (isShiny && def.shinySrc) ? def.shinySrc : def.customSrc;
+  const shimmer = isShiny && !def.shinySrc ? ' filter:drop-shadow(0 0 6px gold);' : '';
+  const styleAttr = `${def.filter?'filter:'+def.filter+';':''}${shimmer}`;
+  const cls = src ? 'sprite-frame avatar-img' : 'sprite-frame';
+  return `<img class="${cls}" ${src?`src="${src}"`:''}${styleAttr?` style="${styleAttr}"`:''} alt="">`;
 }
 
 // ── Screen navigation ─────────────────────────────────────────
@@ -264,10 +255,12 @@ function updateHomeScreen() {
   const ownEl = document.getElementById('own-streak');
 
   if (def) {
-    sprEl.className = 'sprite-frame' + (ch?.isShiny ? ' shiny' : '');
-    applySpriteEl(sprEl, def);
-    if (ch?.isShiny) sprEl.style.filter = (def.filter||'') + ' drop-shadow(0 0 8px gold)';
-    nmEl.textContent = def.name + (ch?.isShiny ? ' ✨' : '');
+    const showShiny = ch?.useShiny ?? ch?.isShiny ?? false;
+    sprEl.closest('.avatar-wrap').style.display = '';
+    sprEl.className = 'sprite-frame' + (showShiny ? ' shiny' : '');
+    applySpriteEl(sprEl, def, showShiny);
+    if (showShiny && !def.shinySrc) sprEl.style.filter = def.filter||'';
+    nmEl.textContent = def.name + (showShiny ? ' ✨' : '');
     if (ch) {
       const own = ch.ownStreak||0;
       if (ch.isShiny) {
@@ -279,12 +272,7 @@ function updateHomeScreen() {
       }
     }
   } else {
-    sprEl.className = 'sprite-frame';
-    applySpriteEl(sprEl, CHARACTER_DEFS.sprout);
-    sprEl.style.opacity = '0.15';
-    sprEl.style.setProperty('--speed','99s');
-    nmEl.textContent = 'Check in to unlock!';
-    ownEl.textContent = '';
+    sprEl.closest('.avatar-wrap').style.display = 'none';
   }
 
   document.getElementById('streak-count').textContent = streak;
@@ -348,12 +336,18 @@ function doCheckin() {
   data.streak.longest = Math.max(data.streak.longest||0, next);
   const cheatEarned = applyCheatMilestones(data, next);
   const newChars    = checkMilestones(data, prev, next);
+  const preShiny    = new Set(Object.keys(data.characters).filter(id => data.characters[id].isShiny));
   tickCharacters(data);
+  const newShinyIds = Object.keys(data.characters).filter(id =>
+    !preShiny.has(id) && data.characters[id].isShiny && !newChars.some(c => c.id === id));
   saveData(data);
   if ('vibrate' in navigator) navigator.vibrate(200);
-  if (newChars.length>0)   showUnlockCelebration(newChars[0].defKey);
-  else if (cheatEarned>0)  showCheatEarned(cheatEarned);
-  updateHomeScreen();
+  const events = [
+    ...newChars.map(c => ({ type:'unlock', id:c.id, defKey:c.defKey })),
+    ...newShinyIds.map(id => ({ type:'shiny', id, defKey:data.characters[id].defKey })),
+  ];
+  if (events.length > 0)  showEventQueue(events);
+  else { if (cheatEarned > 0) showCheatEarned(cheatEarned); updateHomeScreen(); }
 }
 
 function useCheatDay() {
@@ -366,12 +360,19 @@ function useCheatDay() {
   data.streak.current = next;
   data.streak.longest = Math.max(data.streak.longest||0, next);
   applyCheatMilestones(data, next);
-  const newChars = checkMilestones(data, prev, next);
+  const newChars    = checkMilestones(data, prev, next);
+  const preShiny    = new Set(Object.keys(data.characters).filter(id => data.characters[id].isShiny));
   tickCharacters(data);
+  const newShinyIds = Object.keys(data.characters).filter(id =>
+    !preShiny.has(id) && data.characters[id].isShiny && !newChars.some(c => c.id === id));
   saveData(data);
   if ('vibrate' in navigator) navigator.vibrate(200);
-  if (newChars.length>0) showUnlockCelebration(newChars[0].defKey);
-  updateHomeScreen();
+  const events = [
+    ...newChars.map(c => ({ type:'unlock', id:c.id, defKey:c.defKey })),
+    ...newShinyIds.map(id => ({ type:'shiny', id, defKey:data.characters[id].defKey })),
+  ];
+  if (events.length > 0) showEventQueue(events);
+  else updateHomeScreen();
 }
 
 // ── Broken streak ─────────────────────────────────────────────
@@ -412,21 +413,133 @@ function restartAfterBreak() {
 
 // ── Celebrations ──────────────────────────────────────────────
 
-function showUnlockCelebration(defKey) {
-  const def = CHARACTER_DEFS[defKey]; if (!def) return;
-  const sty = def.customSrc
-    ? `--sprite-img:url('${def.customSrc}'); --sprite-group-w:${SPRITE.frameW*def.frames}px; --sx:0px; --speed:${def.speed};`
-    : `--sx:${-(def.col*SPRITE.groupW)}px; background-position-y:${-(def.row*SPRITE.rowH+SPRITE.labelH)}px; --speed:${def.speed};`;
-  const o = document.createElement('div'); o.className='celebration-overlay';
-  o.innerHTML=`<div class="celebration-content">
-    <div class="sprite-wrap-xl"><div class="sprite-frame" style="${sty}${def.filter?' filter:'+def.filter+';':''}"></div></div>
-    <h2>New Character! 🎉</h2><h3>${def.name}</h3><p>${def.desc}</p>
+function showEventQueue(events, idx = 0) {
+  if (idx >= events.length) { updateHomeScreen(); return; }
+  const ev = events[idx];
+  const next = () => showEventQueue(events, idx + 1);
+  if (ev.type === 'unlock') showUnlockChoice(ev.id, ev.defKey, next);
+  else if (ev.type === 'shiny') showShinyChoice(ev.id, ev.defKey, next);
+  else next();
+}
+
+function showUnlockChoice(charId, defKey, onDone) {
+  const def = CHARACTER_DEFS[defKey]; if (!def) { onDone(); return; }
+  const src = def.customSrc || '';
+  const o = document.createElement('div'); o.className = 'celebration-overlay';
+  o.innerHTML = `<div class="celebration-content">
+    <div class="cel-badge">New Character! 🎉</div>
+    <div class="sprite-wrap-xl"><img class="sprite-frame${src ? ' avatar-img' : ''}" ${src ? `src="${src}"` : ''} alt=""></div>
+    <h3>${def.name}</h3>
+    <p>${def.desc}</p>
     <p class="cel-shiny-note">Check in ${def.shinyAt} more days to ✨ Shine!</p>
-    <p style="margin-top:12px;font-size:11px;opacity:0.5">Tap to dismiss</p>
+    <p class="cel-question">Set as your active avatar?</p>
+    <div class="cel-btn-col">
+      <button class="cel-btn-primary" id="cel-set-active">✅ Use ${def.name}</button>
+      <button class="cel-btn-secondary" id="cel-keep">Keep Current</button>
+    </div>
   </div>`;
   document.body.appendChild(o);
-  o.addEventListener('click',()=>o.remove());
-  setTimeout(()=>{if(o.parentNode)o.remove();},6000);
+  o.querySelector('#cel-set-active').addEventListener('click', () => {
+    const data = loadData();
+    data.activeCharId = charId;
+    data.characters[charId].useShiny = false;
+    saveData(data);
+    o.remove(); onDone();
+  });
+  o.querySelector('#cel-keep').addEventListener('click', () => { o.remove(); onDone(); });
+}
+
+function showShinyChoice(charId, defKey, onDone) {
+  const def = CHARACTER_DEFS[defKey]; if (!def) { onDone(); return; }
+  const normalSrc = def.customSrc || '';
+  const shinySrc  = def.shinySrc  || def.customSrc || '';
+  const o = document.createElement('div'); o.className = 'celebration-overlay';
+  o.innerHTML = `<div class="celebration-content">
+    <div class="cel-badge shiny-badge">✨ Shiny Unlocked!</div>
+    <h3>${def.name}</h3>
+    <p class="cel-question">Which version do you want to use?</p>
+    <div class="cel-variants">
+      <div class="cel-variant">
+        <div class="sprite-wrap-sm"><img class="sprite-frame${normalSrc ? ' avatar-img' : ''}" ${normalSrc ? `src="${normalSrc}"` : ''} alt=""></div>
+        <div class="cel-variant-label">Normal</div>
+      </div>
+      <div class="cel-variant cel-variant-shiny">
+        <div class="sprite-wrap-sm"><img class="sprite-frame${shinySrc ? ' avatar-img' : ''}" ${shinySrc ? `src="${shinySrc}"` : ''} alt=""></div>
+        <div class="cel-variant-label">✨ Shiny</div>
+      </div>
+    </div>
+    <div class="cel-btn-col">
+      <button class="cel-btn-shiny" id="cel-use-shiny">✨ Switch to Shiny</button>
+      <button class="cel-btn-secondary" id="cel-keep-normal">Keep Current</button>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  o.querySelector('#cel-use-shiny').addEventListener('click', () => {
+    const data = loadData();
+    data.activeCharId = charId;
+    data.characters[charId].useShiny = true;
+    saveData(data);
+    o.remove(); onDone();
+  });
+  o.querySelector('#cel-keep-normal').addEventListener('click', () => { o.remove(); onDone(); });
+}
+
+// ── Avatar picker ────────────────────────────────────────────
+
+function showAvatarPicker() {
+  const data = loadData();
+  if (!Object.keys(data.characters).length) return;
+
+  const o = document.createElement('div');
+  o.className = 'avatar-picker-overlay';
+
+  let rows = '';
+  for (const [id, ch] of Object.entries(data.characters)) {
+    const def = CHARACTER_DEFS[ch.defKey]; if (!def) continue;
+    const activeId  = data.activeCharId;
+    const useShiny  = ch.useShiny || false;
+    const normalSrc = def.customSrc || '';
+    const shinySrc  = def.shinySrc  || def.customSrc || '';
+    const isNormSel = id === activeId && !useShiny;
+    const isShSel   = id === activeId && useShiny;
+
+    rows += `<div class="picker-row">
+      <div class="picker-row-name">${def.name}</div>
+      <div class="picker-variants">
+        <div class="picker-tile${isNormSel ? ' picker-tile-sel' : ''}" data-id="${id}" data-shiny="false">
+          <div class="sprite-wrap-sm"><img class="sprite-frame${normalSrc ? ' avatar-img' : ''}" ${normalSrc ? `src="${normalSrc}"` : ''} alt=""></div>
+          <div class="picker-tile-label">Normal</div>
+        </div>
+        <div class="picker-tile${ch.isShiny ? (isShSel ? ' picker-tile-sel picker-tile-shiny' : ' picker-tile-shiny') : ' picker-tile-locked'}" ${ch.isShiny ? `data-id="${id}" data-shiny="true"` : ''}>
+          ${ch.isShiny
+            ? `<div class="sprite-wrap-sm"><img class="sprite-frame${shinySrc ? ' avatar-img' : ''}" ${shinySrc ? `src="${shinySrc}"` : ''} alt=""></div>`
+            : `<div class="sprite-wrap-sm sprite-locked-wrap"><span class="sprite-locked-icon">🔒</span></div>`}
+          <div class="picker-tile-label">${ch.isShiny ? '✨ Shiny' : `${ch.ownStreak||0}/${def.shinyAt}d`}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  o.innerHTML = `<div class="avatar-picker-panel">
+    <div class="picker-header">
+      <span class="picker-title">Change Avatar</span>
+      <button class="picker-close" id="picker-close">✕</button>
+    </div>
+    <div class="picker-body">${rows}</div>
+  </div>`;
+
+  document.body.appendChild(o);
+
+  o.querySelector('#picker-close').addEventListener('click', () => o.remove());
+  o.addEventListener('click', e => { if (e.target === o) o.remove(); });
+
+  o.querySelectorAll('.picker-tile[data-id]').forEach(tile => {
+    tile.addEventListener('click', () => {
+      setActiveChar(tile.dataset.id, tile.dataset.shiny === 'true');
+      o.remove();
+      updateHomeScreen();
+    });
+  });
 }
 
 function showCheatEarned(n) {
@@ -449,19 +562,43 @@ function renderDeck() {
   const grid = document.getElementById('deck-grid');
   grid.innerHTML = '';
 
-  for (const [id,ch] of Object.entries(data.characters)) {
+  for (const [id, ch] of Object.entries(data.characters)) {
     const def = CHARACTER_DEFS[ch.defKey]; if (!def) continue;
-    const isActive = id === data.activeCharId;
-    const pct      = ch.isShiny ? 100 : Math.min(100,((ch.ownStreak||0)/def.shinyAt)*100);
+    const isActiveChar = id === data.activeCharId;
+    const useShiny     = ch.useShiny || false;
+    const pct = ch.isShiny ? 100 : Math.min(100, ((ch.ownStreak||0) / def.shinyAt) * 100);
+    const sub = ch.isShiny ? '✨ Shiny unlocked!' : `${ch.ownStreak||0}/${def.shinyAt} days to ✨`;
+
     const card = document.createElement('div');
-    card.className = 'char-card'+(isActive?' active':'')+(ch.isShiny?' shiny':'');
-    card.onclick = () => setActiveChar(id);
+    card.className = 'char-card' + (isActiveChar ? ' active' : '');
     card.innerHTML = `
-      <div class="sprite-wrap-sm">${spriteCardHTML(def)}</div>
-      <div class="char-card-name">${def.name}${ch.isShiny?' ✨':''}</div>
+      <div class="char-card-header">
+        <span class="char-card-name">${def.name}</span>
+        ${isActiveChar ? '<span class="char-active-badge">Active</span>' : ''}
+      </div>
+      <div class="char-variants">
+        <div class="char-variant${isActiveChar && !useShiny ? ' selected' : ''}" data-id="${id}" data-shiny="false">
+          <div class="sprite-wrap-sm">${spriteCardHTML(def, false)}</div>
+          <div class="variant-label">Normal</div>
+        </div>
+        <div class="char-variant${ch.isShiny ? (isActiveChar && useShiny ? ' selected' : '') : ' locked'}">
+          ${ch.isShiny ? `<div class="sprite-wrap-sm">${spriteCardHTML(def, true)}</div>` : '<div class="sprite-wrap-sm sprite-locked-wrap"><span class="sprite-locked-icon">🔒</span></div>'}
+          <div class="variant-label">✨ Shiny</div>
+        </div>
+      </div>
       <div class="char-own-bar"><div class="char-own-fill" style="width:${pct}%"></div></div>
-      <div class="char-card-sub">${ch.isShiny?'✨ Shiny!':((ch.ownStreak||0)+'/'+def.shinyAt+' days')}</div>
-      ${isActive?'<div class="char-active-badge">Active</div>':''}`;
+      <div class="char-card-sub">${sub}</div>`;
+
+    // Attach click to normal variant
+    card.querySelector('.char-variant[data-id]').addEventListener('click', () => setActiveChar(id, false));
+    // Attach click to shiny variant only when unlocked
+    if (ch.isShiny) {
+      const shinyVariant = card.querySelectorAll('.char-variant')[1];
+      shinyVariant.dataset.id    = id;
+      shinyVariant.dataset.shiny = 'true';
+      shinyVariant.addEventListener('click', () => setActiveChar(id, true));
+    }
+
     grid.appendChild(card);
   }
 
@@ -478,12 +615,13 @@ function renderDeck() {
   }
 }
 
-function setActiveChar(id) {
+function setActiveChar(id, useShiny = false) {
   const data = loadData();
   if (!data.characters[id]) return;
   data.activeCharId = id;
+  data.characters[id].useShiny = useShiny;
   saveData(data);
-  showScreen('home');
+  renderDeck();
 }
 
 // ── Calendar ──────────────────────────────────────────────────
@@ -539,6 +677,36 @@ function loadSettingsScreen() {
   if (el) el.textContent = offset > 0
     ? `Simulated: ${todayStr()}  (+${offset} days)`
     : `Today: ${todayStr()}`;
+
+  // Populate character select
+  const sel = document.getElementById('dev-char-select');
+  if (sel) {
+    const prev = sel.value;
+    sel.innerHTML = Object.entries(CHARACTER_DEFS)
+      .map(([key,def]) => `<option value="${key}">${def.name} (${def.earnAt<0?'special':'day '+def.earnAt})</option>`)
+      .join('');
+    if (prev) sel.value = prev;
+  }
+  const st = document.getElementById('dev-unlock-status');
+  if (st) st.textContent = '';
+}
+
+function devUnlockChar(defKey, makeShiny) {
+  const data = loadData();
+  const def = CHARACTER_DEFS[defKey];
+  if (!def) return;
+  let id = Object.keys(data.characters).find(k => data.characters[k].defKey === defKey);
+  if (!id) id = addCharacter(data, defKey);
+  const ch = data.characters[id];
+  if (makeShiny) {
+    ch.isShiny = true;
+    ch.useShiny = true;
+    ch.ownStreak = def.shinyAt;
+  }
+  if (!data.activeCharId) data.activeCharId = id;
+  saveData(data);
+  const st = document.getElementById('dev-unlock-status');
+  if (st) st.textContent = makeShiny ? `✨ ${def.name} is now shiny!` : `🔓 ${def.name} unlocked!`;
 }
 
 function resetData() {

@@ -15,7 +15,7 @@ const APP_SHELL = [
   './icons/icon-192.svg',
   './icons/icon-512.svg',
   './sprites.png',
-  './avatar-jumprope.png',
+  './avatars/avatar-jumprope.png',
 ];
 
 // Install: pre-cache the app shell
