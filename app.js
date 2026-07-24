@@ -18,7 +18,7 @@ const CHARACTER_DEFS = {
   runner:   { name:'Trail Runner',  earnAt:60,  customSrc:'avatars/avatar-runner.png',    shinySrc:'avatars/avatar-runner-shiny.png',    shinyAt:50,  speed:'0.8s',  desc:'Two months, full stride!' },
   bookworm: { name:'Bookworm',      earnAt:100, customSrc:'avatars/avatar-bookworm.png',  shinySrc:'avatars/avatar-bookworm-shiny.png',  shinyAt:60,  speed:'1.0s',  desc:'100 days — incredible!' },
   dancer:   { name:'Dance Machine', earnAt:180, customSrc:'avatars/avatar-dancer.png',   shinySrc:'avatars/avatar-dancer-shiny.png',   shinyAt:75,  speed:'0.7s',  desc:'Six months of moves!' },
-  legend:   { name:'Year Legend',   earnAt:365, src:'sprites.png', frames:3, row:4, col:2, shinyAt:100, speed:'0.65s', desc:'A full year. Legendary!' },
+  legend:   { name:'Year Legend',   earnAt:365, customSrc:'avatars/avatar-legend.png',   shinySrc:'avatars/avatar-legend-shiny.png',   shinyAt:100, speed:'0.65s', desc:'A full year. Legendary!' },
   crash:    { name:'Sugar Crash',   earnAt:-1,  customSrc:'avatars/avatar-crash.png', shinySrc:'avatars/avatar-crash-shiny.png', shinyAt:14,  speed:'2.5s',  desc:'Even crashes can shine…' },
 };
 
@@ -709,6 +709,28 @@ function devUnlockChar(defKey, makeShiny) {
   saveData(data);
   const st = document.getElementById('dev-unlock-status');
   if (st) st.textContent = makeShiny ? `✨ ${def.name} is now shiny!` : `🔓 ${def.name} unlocked!`;
+}
+
+function devUnlockAll(makeShiny) {
+  const data = loadData();
+  for (const defKey of Object.keys(CHARACTER_DEFS)) {
+    if (defKey === 'crash') continue; // crash is special — only appears on streak break
+    let id = Object.keys(data.characters).find(k => data.characters[k].defKey === defKey);
+    if (!id) id = addCharacter(data, defKey);
+    if (makeShiny) {
+      const def = CHARACTER_DEFS[defKey];
+      data.characters[id].isShiny = true;
+      data.characters[id].useShiny = true;
+      data.characters[id].ownStreak = def.shinyAt;
+    }
+  }
+  if (!data.activeCharId) {
+    const first = Object.keys(data.characters)[0];
+    if (first) data.activeCharId = first;
+  }
+  saveData(data);
+  const st = document.getElementById('dev-unlock-status');
+  if (st) st.textContent = makeShiny ? '✨ All characters unlocked and shiny!' : '🔓 All characters unlocked!';
 }
 
 function resetData() {
