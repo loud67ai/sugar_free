@@ -13,7 +13,7 @@ const CHARACTER_DEFS = {
   sprout:   { name:'Sugar Sprout',  earnAt:1,   customSrc:'avatars/avatar-sprout.png', shinySrc:'avatars/avatar-sprout-shiny.png', frames:3, shinyAt:7,   speed:'0.9s',  desc:'Your first step to freedom!' },
   jumprope: { name:'Week Warrior',  earnAt:7,   customSrc:'avatars/avatar-jumprope.png', shinySrc:'avatars/avatar-jumprope-shiny.png', shinyAt:28,  speed:'1.0s',  desc:'7 days sugar free!' },
   bicep:    { name:'Iron Pumper',   earnAt:21,  customSrc:'avatars/avatar-bicep.png',    shinySrc:'avatars/avatar-bicep-shiny.png',    shinyAt:35,  speed:'0.8s',  desc:'Three weeks of strength!' },
-  broccoli: { name:'Broccoli Boss', earnAt:14,  src:'sprites.png', frames:3, row:1, col:1, shinyAt:28,  speed:'0.8s',  desc:'Two strong weeks!' },
+  broccoli: { name:'Broccoli Boss', earnAt:14,  customSrc:'avatars/avatar-broccoli.png',  shinySrc:'avatars/avatar-broccoli-shiny.png',  shinyAt:28,  speed:'0.8s',  desc:'Two strong weeks!' },
   zen:      { name:'Zen Master',    earnAt:30,  customSrc:'avatars/avatar-zen.png',      shinySrc:'avatars/avatar-zen-shiny.png',      shinyAt:42,  speed:'1.2s',  desc:'A whole month!' },
   runner:   { name:'Trail Runner',  earnAt:60,  customSrc:'avatars/avatar-runner.png',    shinySrc:'avatars/avatar-runner-shiny.png',    shinyAt:50,  speed:'0.8s',  desc:'Two months, full stride!' },
   bookworm: { name:'Bookworm',      earnAt:100, customSrc:'avatars/avatar-bookworm.png',  shinySrc:'avatars/avatar-bookworm-shiny.png',  shinyAt:60,  speed:'1.0s',  desc:'100 days — incredible!' },
